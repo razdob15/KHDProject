@@ -1,0 +1,142 @@
+<head>
+    <title>KHD Project</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+</head>
+
+<body>
+<div class="container">
+<div class="row">
+        <ul class="nav nav-tabs mt-2 mb-5 col-md-9 col-md-offset-3" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link" id="home-tab" data-toggle="tab" role="tab" aria-controls="home"
+                   aria-selected="false" href="/">KHD</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" id="booking-tab" data-toggle="tab" role="tab" aria-controls="booking"
+                   aria-selected="true" href="/booking-demand">Book Now</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="booking-demand-tab" data-toggle="tab" role="tab" aria-controls="booking-demand"
+                   aria-selected="false" href="/booking-demands">Demands</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="calculate-tab" data-toggle="tab" role="tab" aria-controls="calculate"
+                   aria-selected="false" href="/calculate">Calculate</a>
+            </li>
+        </ul>
+        <img src="/static/img/bhd1.png" alt="bhd1.png" class="img-fluid mt-2 mb-5 col-md-2 square" style="overflow:hidden; position:relative" >
+    </div>
+    <main role="main">
+        <section class="jumbotron">
+            <div class="container">
+                <p class="lead text-muted">Please fill the details of the room you want below</p>
+                <form>
+                    <div class="form-group">
+                        <label class="lead" for="teamID">Team ID</label>
+                        <input type="text" class="form-control lead" id="teamID" placeholder="Enter team ID">
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="projectorCheckbox">
+                        <label class="lead" class="form-check-label" for="projectorCheckbox">Need a projector?</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label class="lead" for="date">Date</label>
+                            <input type="date" class="form-control lead" id="date"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4  form-group">
+                            <label class="lead" for="startTime">StartTime</label>
+                            <input type="time" class="form-control lead" id="startTime" placeholder="Start Time">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label class="lead" for="endTime">StartTime</label>
+                            <input type="time" class="form-control lead" id="endTime" placeholder="End Time">
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="invisible" id="form_alert" role="alert">
+                            Please make sure that the start time is earlier then end time.
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="reserveBtn">I wish I had a room</button>
+
+                </form>
+            </div>
+        </section>
+    </main>
+
+</div>
+
+</body>
+<script>
+    function show_alert(alert_element, text, color) {
+        alert_element.removeClass()
+        alert_element.text(text)
+        alert_element.addClass('alert')
+        alert_element.addClass('alert-' + color)
+    }
+
+    function dismiss_alert(alert_element) {
+        alert_element.removeClass()
+        alert_element.addClass("invisible")
+    }
+
+    $(document).ready(function () {
+        $("#reserveBtn").click(function () {
+            const alert_elem = $("#form_alert")
+            let team_id = $("#teamID").val()
+            let need_projector = $("#projectorCheckbox:checked").val() ? 1 : 0
+            let date = $("#date").val()
+            let start = $("#startTime").val()
+            let end = $("#endTime").val()
+
+            if (start < end) {
+                dismiss_alert(alert_elem)
+
+                $.ajax({
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        "team_id": team_id,
+                        "need_projector": need_projector,
+                        "start_time": date + ' ' + start,
+                        "end_time": date + ' ' + end
+                    }),
+                    dataType: 'json',
+                    success: function (a, b, res) {
+                        switch (res['status']) {
+                            case 204:
+                                show_alert(alert_elem, "Your demand was stores successfully", "success");
+                                break
+                            case 304:
+                                show_alert(alert_elem, "The demand overlaps with another demand", "warning");
+                                break
+                            default:
+                                show_alert(alert_elem, "An error occurred", "danger");
+                                break
+                        }
+                    },
+                    error: function (e) {
+                        show_alert(alert_elem, "An error occurred " + e, "danger")
+                    },
+                    type: 'POST',
+                    url: '/api/booking-demand'
+                });
+
+
+            } else {
+                show_alert(alert_elem, "Make sure start time is earlier the the end time.", "warning")
+            }
+        })
+    })
+</script>

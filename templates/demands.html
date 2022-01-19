@@ -1,0 +1,129 @@
+<head>
+    <title>KHD Project</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <ul class="nav nav-tabs mt-2 mb-5 col-md-9 col-md-offset-3" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link" id="home-tab" data-toggle="tab" role="tab" aria-controls="home"
+                   aria-selected="false" href="/">KHD</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="booking-tab" data-toggle="tab" role="tab" aria-controls="booking"
+                   aria-selected="false" href="/booking-demand">Book Now</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link active" id="booking-demand-tab" data-toggle="tab" role="tab"
+                   aria-controls="booking-demand"
+                   aria-selected="true" href="/booking-demands">Demands</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="calculate-tab" data-toggle="tab" role="tab" aria-controls="calculate"
+                   aria-selected="false" href="/calculate">Calculate</a>
+            </li>
+        </ul>
+        <img src="/static/img/bhd1.png" alt="bhd1.png" class="img-fluid mt-2 mb-5 col-md-2 square"
+             style="overflow:hidden; position:relative">
+    </div>
+    {% if team_id %}
+        <main role="main">
+        <section class="jumbotron">
+            <div class="container">
+                <p class="lead text-muted">Here you can find the demands that already has been stored for each team.</p>
+                <h1>Team: {{ team_id }}</h1>
+                <table class="table">
+                    <tr>
+                        <th scope="col">Index</th>
+                        <th scope="col">Delete</th>
+                        <th scope="col">Start Hour</th>
+                        <th scope="col">End Hour</th>
+                        <th scope="col">Need projector?</th>
+                    </tr>
+                    {% for w in wishes %}
+                        <tr id="wish_{{ loop.index }}">
+                            <td>{{ loop.index }}</td>
+                            <td id="delete_{{ loop.index }}" class="ps-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                     class="bi bi-trash" viewBox="0 0 16 16">
+                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
+                                    <path fill-rule="evenodd"
+                                          d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
+                                </svg>
+                            </td>
+
+                            <td>{{ w.start_time.strftime("%H:%M") }}</td>
+                            <td>{{ w.end_time.strftime("%H:%M") }}</td>
+                            <td>{{ w.need_projector }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </section>
+    {% else %}
+        <main role="main">
+        <section class="jumbotron">
+            <div class="container">
+                <p class="lead text-muted">Here you can find the demands that already has been stored for each team.</p>
+
+                <div class="input-group mb-3">
+                    <label class="lead me-3" for="teamID">Your team number</label>
+                    <input type="text" class="form-control" placeholder="Team ID" id="teamID"
+                           aria-describedby="basic-addon1">
+                </div>
+                <button type="button" class="btn btn-primary mt-4 lead" id="submitBtn">Show me my demands</button>
+            </div>
+        </section>
+    {% endif %}
+    </main>
+</div>
+
+</body>
+
+<script>
+    $(document).ready(function () {
+        {% for w in wishes %}
+            console.log("AAA")
+            $("#delete_{{ loop.index }}").click(function () {
+                console.log("DELETE {{ loop.index }}");
+                let start = "{{ w.start }}";
+                let end = "{{ w.end }}";
+
+                $.ajax({
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        "start_time": start,
+                        "end_time": end
+                    }),
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log("AAAA")
+                        $("#delete_{{ loop.index }}").parents('tr').remove();
+                    },
+                    error: function (e) {
+                        show_alert(alert_elem, "An error occurred " + e, "danger")
+                    },
+                    type: 'DELETE',
+                    url: '/api/booking-demand'
+                });
+
+
+            })
+        {% endfor %}
+        const team_id_elem = $("#teamID")
+        $("#submitBtn").click(function () {
+            console.log(team_id_elem.val());
+            window.location.replace("/booking-demands/" + $("#teamID").val())
+        })
+    })
+</script>
