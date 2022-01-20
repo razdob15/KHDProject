@@ -128,4 +128,7 @@ def calculate():
 
 
 if __name__ == '__main__':
+    import os
+
+    os.environ['PORT'] = 5000
     app.run(host='0.0.0.0')
