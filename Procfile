@@ -1,1 +1,1 @@
-web: export PORT=5000 && python app.py
+web: python app.py
