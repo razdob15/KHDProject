@@ -80,14 +80,12 @@ def calculate_api():
 
     # Debug section
     for room_id, r in ROOMS.items():
-        print('---')
-        print(room_id)
         for bd, team_id in r.schedule:
             main_schedule.append((team_id,
                                   room_id,
                                   datetime.strftime(bd.start_time, '%d/%m/%Y'),
                                   datetime.strftime(bd.start_time, '%H:%M'),
-                                  datetime.strftime(bd.start_time, '%H:%M')))
+                                  datetime.strftime(bd.end_time, '%H:%M')))
 
     return render_template('result.html', schedule=main_schedule)
 
