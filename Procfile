@@ -1,1 +1,1 @@
-web: gunicorn khd:app
+web: python app.py
