@@ -159,7 +159,7 @@ def delete_room(room_id):
 @app.route("/api/validate-password", methods=['POST'])
 def validate_password():
     payload = dict(request.get_json())
-    if 'password' in os.environ.keys() and payload['password'] == os.environ['password']:
+    if 'PASSWORD' in os.environ.keys() and payload['PASSWORD'] == os.environ['PASSWORD']:
         return {"status": 'true'}, 200
     return {"status": 'false'}, 400
 
